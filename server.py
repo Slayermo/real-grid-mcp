@@ -1,3 +1,16 @@
+import uvicorn
+
+# --- THE MONKEY PATCH ---
+# This intercepts the background web engine before FastMCP loads
+# and forces it to trust Render's secure HTTPS proxy!
+original_config_init = uvicorn.Config.__init__
+def patched_config_init(self, *args, **kwargs):
+    kwargs["proxy_headers"] = True
+    kwargs["forwarded_allow_ips"] = "*"
+    original_config_init(self, *args, **kwargs)
+uvicorn.Config.__init__ = patched_config_init
+# ------------------------
+
 from fastmcp import FastMCP
 import os
 import psycopg2
